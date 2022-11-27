@@ -1,10 +1,18 @@
-# FrontendApp
+#frontend-app Group 5 Week 4 
+
+##Group 5 Week 4 Homework
+This is the frontend for the week 4 weekend project for Group 5/
+
+* Complete the projects together
+* Create a voting dApp to cast votes, delegate and query results on chain
+* Request voting tokens to be minted using the API
+* (bonus) Store a list of recent votes in the backend and display that on frontend
+
+##Dev server
+`npm run start:dev` or `yarn start:dev` to get it showing on `http://localhost:4200/`, automatically reloading.
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.2.10.
 
-## Development server
-
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
 ## Code scaffolding
 
@@ -14,14 +22,6 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
+## Help!
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
