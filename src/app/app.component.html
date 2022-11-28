@@ -63,9 +63,16 @@
     >
       Connect Ballot
     </button>
-    <div *ngIf="ballotProposals" class="col-lg-6 mx-auto">
+    <div *ngIf="ballotProposalsDisplay" class="col-lg-12 mx-auto">
       <ul>
-        <li *ngFor="let proposal of ballotProposals">{{ proposal }}</li>
+        <li *ngFor="let proposal of ballotProposalsDisplay"> 
+          Proposal Index: {{ proposal.idx }}  &nbsp; &nbsp; Is proposal {{ proposal.idx }} Winning? {{ proposal.isWinning }} 
+          <br/>
+          &nbsp; &nbsp; Proposal {{ proposal.idx }} Name: {{ proposal.name }} 
+          &nbsp; &nbsp; Proposal {{ proposal.idx }} VoteCount: {{ proposal.voteCount }} 
+          <hr/>
+        
+        </li>
       </ul>
     </div>
   </div>

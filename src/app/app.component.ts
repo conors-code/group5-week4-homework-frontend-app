@@ -11,6 +11,8 @@ import tokenJson from '../assets/MyToken.json';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
+
+
 export class AppComponent {
   provider: ethers.providers.Provider;
   wallet: ethers.Wallet | undefined;
@@ -19,7 +21,14 @@ export class AppComponent {
   tokenBalance: number | undefined;
   votePower: number | undefined;
   tokenAddress: string | undefined;
-  ballotProposals: [] | undefined;
+  ballotProposals:[] | undefined;
+  ballotProposalsDisplay:[ {
+      idx: string;
+      name: string;
+      voteCount: string;
+      isWinning: string;
+    }] | undefined;
+  
 
   constructor(private http: HttpClient) {
     //http is injected in constructor and is available in all fns
@@ -124,7 +133,24 @@ export class AppComponent {
         address: ballotContractAddress,
       })
       .subscribe((ans) => {
+        
         this.ballotProposals = ans.result;
+        this.ballotProposals?.map((proposal, i) => {
+          const idx = ethers.BigNumber.from(proposal[0]).toString();
+          let name = ethers.utils.parseBytes32String(proposal[1]);
+          const voteCount = ethers.BigNumber.from(proposal[2]).toString();
+          let isWinning = ethers.utils.parseBytes32String(proposal[3]);
+          if (this.ballotProposalsDisplay === undefined) {
+            this.ballotProposalsDisplay = [{         
+              "idx": idx, "name": name , "voteCount": voteCount, "isWinning": isWinning
+            }];
+          } else  {  //already defined and initialised
+            this.ballotProposalsDisplay?.push({         
+              "idx": idx, "name": name , "voteCount": voteCount, "isWinning": isWinning
+            });
+          }
+          console.log("idx" + idx + "name" + name + "voteCount" + voteCount + "isWinning" +isWinning);
+        });
       });
   }
 }
