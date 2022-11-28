@@ -29,25 +29,33 @@ export class AppComponent {
   createWallet() {
     //this is not a promise, it is an observabel so cannot be awaited. Can subscribe
     //  instead of await
-    console.log("About to subscribe");
     this.http.get<any>('http://localhost:3000/token-address').subscribe((ans) => {
       this.tokenAddress = ans.result;
-      
-      console.log("Token addr is");
-      console.log(ans.result  + ", " + this.tokenAddress);
-      if (this.tokenAddress) { //if the address isn't null, do the wallet, contract, ...
-        //this.wallet = new ethers.Wallet(userProvidedPrivateKey);
-        this.wallet = ethers.Wallet.createRandom().connect(
-          this.provider
-        );
-        //setup a token contract
-        this.tokenContract = new ethers.Contract(
-          this.tokenAddress, tokenJson.abi, this.wallet);
-        //this.wallet.getBalance() returns a promise
-        //need .then to wait for the promise resolution
-        this.updateInfo();
-      }
+      const unconnectedWallet = ethers.Wallet.createRandom();
+      this.updateContractInfoForWallet(unconnectedWallet);
     });
+  }
+
+  importWallet(walletPrivateKey: string) {
+    this.http.get<any>("http://localhost:3000/token-address")
+      .subscribe((ans) => {
+          this.tokenAddress = ans.result;
+          if (walletPrivateKey) {
+            const unconnectedWallet = new ethers.Wallet(walletPrivateKey);
+            this.updateContractInfoForWallet(unconnectedWallet);
+          }
+    });
+  }
+
+  private updateContractInfoForWallet(unconnectedWallet: ethers.Wallet) {
+    //if the address isn't null, do the wallet, contract, update
+    if (this.tokenAddress) { 
+      this.wallet = unconnectedWallet.connect(this.provider);
+      this.tokenContract = new ethers.Contract(
+        this.tokenAddress, tokenJson.abi, this.wallet
+      );
+      this.updateInfo();
+    }
   }
 
   /**If the wallet and contract are already set we can update the display for
@@ -66,33 +74,38 @@ export class AppComponent {
         this.tokenContract["balanceOf"](this.wallet.address).then(
           (balanceBN: ethers.BigNumberish) => {
             this.tokenBalance = parseFloat(ethers.utils.formatEther(balanceBN));
+            console.log("In updateInfo, this.wallet is AOK, new token balance is " + this.tokenBalance);
         });
         this.tokenContract["getVotes"](this.wallet.address).then(
           (votePowerBN: ethers.BigNumberish) => {
             this.votePower = parseFloat(ethers.utils.formatEther(votePowerBN));
         });
       }
+    } else {
+      console.log("In updateInfo, this.wallet is unset");
     }
   }
 
   //TODO await for this transaction to be completed
   claimTokens() {
+    console.log("wallet addr is: " + this.wallet?.address);
     this.http
     .post<any>('http://localhost:3000/claim-tokens', {
       address: this.wallet?.address
     })
     .subscribe((ans) => {
-      //console.log({ans});
       //TODO await for this transaction to be completed.
       //This will be a tx hash
       const txHash = ans.result;
+      console.log("Ans result is: " + ans.result);
       
-      this.provider.getTransaction(txHash).then((tx) => {
-        tx.wait().then((txReceipt) => {
+      this.provider.getTransaction(txHash).then(() => {
+        //tx.wait().then((txReceipt) => {
           //TODO (optional) Display the update info.
           //reload info by calling the updateInfo etc again.
+          console.log("About to call updateInfo");
           this.updateInfo();
-        })
+        //})
       })
     });
   }

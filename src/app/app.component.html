@@ -8,13 +8,21 @@
         <button (click)="createWallet()" type="button" class="btn btn-success btn-lg px-4 gap-3">
           Create wallet
         </button>
-        <button type="button" disabled class="btn btn-info btn-lg px-4 gap-3">
+      </div><br/>
+      <p>or, paste in your wallet's private key and import that</p>
+      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+        
+        <input class="form-control" style="width:50%"
+          #walletPrivateKeyInput type="text"
+          placeholder="Paste wallet's private key here"><br/>
+        <button type="button" (click)="importWallet(walletPrivateKeyInput.value)" 
+          class="btn btn-info btn-lg px-4 gap-3">
           Import Wallet
-        <!--Have sth here where when you click import it allows you to 
-          paste in a privKey into an input control, and click another "Import" to
-          actually import.  Or else show the input text and just click the one 
-          import button-->
         </button>
+      </div>
+      <br/>
+      <br/>
+      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
         <button type="button" disabled class="btn btn-danger btn-lg px-4 gap-3">
           Connect Wallet
         </button>
