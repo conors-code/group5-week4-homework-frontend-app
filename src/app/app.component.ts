@@ -9,21 +9,21 @@ import tokenJson from '../assets/MyToken.json';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
-
-export class AppComponent {  
-  provider : ethers.providers.Provider;
+export class AppComponent {
+  provider: ethers.providers.Provider;
   wallet: ethers.Wallet | undefined;
   tokenContract: ethers.Contract | undefined;
   etherBalance: number | undefined;
   tokenBalance: number | undefined;
   votePower: number | undefined;
   tokenAddress: string | undefined;
+  ballotProposals: [] | undefined;
 
-  constructor(private http:HttpClient) {
+  constructor(private http: HttpClient) {
     //http is injected in constructor and is available in all fns
-    this.provider = ethers.providers.getDefaultProvider("goerli");
+    this.provider = ethers.providers.getDefaultProvider('goerli');
   }
 
   createWallet() {
@@ -71,15 +71,16 @@ export class AppComponent {
         this.etherBalance = parseFloat(ethers.utils.formatEther(balanceBN));
       });
       if (this.tokenContract) {
-        this.tokenContract["balanceOf"](this.wallet.address).then(
+        this.tokenContract['balanceOf'](this.wallet.address).then(
           (balanceBN: ethers.BigNumberish) => {
             this.tokenBalance = parseFloat(ethers.utils.formatEther(balanceBN));
-            console.log("In updateInfo, this.wallet is AOK, new token balance is " + this.tokenBalance);
-        });
-        this.tokenContract["getVotes"](this.wallet.address).then(
+          }
+        );
+        this.tokenContract['getVotes'](this.wallet.address).then(
           (votePowerBN: ethers.BigNumberish) => {
             this.votePower = parseFloat(ethers.utils.formatEther(votePowerBN));
-        });
+          }
+        );
       }
     } else {
       console.log("In updateInfo, this.wallet is unset");
@@ -93,36 +94,37 @@ export class AppComponent {
     .post<any>('http://localhost:3000/claim-tokens', {
       address: this.wallet?.address
     })
-    .subscribe((ans) => {
-      //TODO await for this transaction to be completed.
-      //This will be a tx hash
-      const txHash = ans.result;
-      console.log("Ans result is: " + ans.result);
-      
-      this.provider.getTransaction(txHash).then(() => {
-        //tx.wait().then((txReceipt) => {
-          //TODO (optional) Display the update info.
-          //reload info by calling the updateInfo etc again.
-          console.log("About to call updateInfo");
-          this.updateInfo();
-        //})
-      })
-    });
+      .subscribe((ans) => {
+        //console.log({ans});
+        //TODO await for this transaction to be completed.
+        //This will be a tx hash
+        const txHash = ans.result;
+
+        this.provider.getTransaction(txHash).then((tx) => {
+          tx.wait().then((txReceipt) => {
+            //TODO (optional) Display the update info.
+            //reload info by calling the updateInfo etc again.
+            this.updateInfo();
+          });
+        });
+      });
   }
 
   connectBallot(ballotContractAddress: string) {
     this.getballotInfo(ballotContractAddress);
   }
 
-  delegate() {
-    
-  }
+  delegate() {}
 
-  castVote() {
-    
-  }
+  castVote() {}
 
   getballotInfo(ballotContractAddress: string) {
-    
+    this.http
+      .post<any>('http://localhost:3000/connect-ballot', {
+        address: ballotContractAddress,
+      })
+      .subscribe((ans) => {
+        this.ballotProposals = ans.result;
+      });
   }
 }

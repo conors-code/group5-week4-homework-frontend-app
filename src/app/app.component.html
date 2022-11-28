@@ -1,7 +1,7 @@
 <div class="px-4 py-5 my-5 text-center">
-    <h1 class="display-5 fw-bold">My Ballot Example</h1>
-    <div *ngIf="!wallet" class="col-lg-6 mx-auto">
-      <!--<p *ngIf="lastBlockNumber">The last block in the blockchain is {{ lastBlockNumber }}.</p>
+  <h1 class="display-5 fw-bold">My Ballot Example</h1>
+  <div *ngIf="!wallet" class="col-lg-6 mx-auto">
+    <!--<p *ngIf="lastBlockNumber">The last block in the blockchain is {{ lastBlockNumber }}.</p>
       <p>My number is {{ myNumber }} </p>-->
       <p>To use this ballot, connect a wallet</p>
       <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
@@ -52,15 +52,51 @@
       <button (click)="claimTokens()" type="button" class="btn btn-success btn-lg px-4 gap-3">
         Claim Tokens
       </button>
-      <p class="my-4">Connect to the ballot here: </p>
-      <input class="form-control mb-4"
-         #ballotContractAddress type="text"
-         placeholder="Paste ballot contract address here"><br/>
-      <button (click)="connectBallot(ballotContractAddress.value)" 
-        type="button" class="btn btn-success btn-lg px-4 gap-3">
-        Connect Ballot
+      <button type="button" disabled class="btn btn-danger btn-lg px-4 gap-3">
+        Connect Wallet
       </button>
-
-
     </div>
+  </div>
+  <div *ngIf="wallet" class="col-lg-6 mx-auto">
+    <p>You are connected to the wallet at {{ wallet.address }}</p>
+    <p>This application uses the token at the address {{ tokenAddress }}</p>
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+      <div class="card">
+        <div class="card-body">My ether balance is: {{ etherBalance }}</div>
+      </div>
+      <div class="card">
+        <div class="card-body">My token balance is: {{ tokenBalance }}</div>
+      </div>
+      <div class="card">
+        <div class="card-body">My voting power is: {{ votePower }}</div>
+      </div>
+    </div>
+    <p class="my-4">claim your tokens here:</p>
+    <button
+      (click)="claimTokens()"
+      type="button"
+      class="btn btn-success btn-lg px-4 gap-3"
+    >
+      Claim Tokens
+    </button>
+    <p class="my-4">Connect to the ballot here:</p>
+    <input
+      class="form-control mb-4"
+      #ballotContractAddress
+      type="text"
+      placeholder="Paste ballot contract address here"
+    /><br />
+    <button
+      (click)="connectBallot(ballotContractAddress.value)"
+      type="button"
+      class="btn btn-success btn-lg px-4 gap-3"
+    >
+      Connect Ballot
+    </button>
+    <div *ngIf="ballotProposals" class="col-lg-6 mx-auto">
+      <ul>
+        <li *ngFor="let proposal of ballotProposals">{{ proposal }}</li>
+      </ul>
+    </div>
+  </div>
 </div>
