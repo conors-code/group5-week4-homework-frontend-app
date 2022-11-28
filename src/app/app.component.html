@@ -3,21 +3,54 @@
   <div *ngIf="!wallet" class="col-lg-6 mx-auto">
     <!--<p *ngIf="lastBlockNumber">The last block in the blockchain is {{ lastBlockNumber }}.</p>
       <p>My number is {{ myNumber }} </p>-->
-    <p>To use this ballot, connect a wallet</p>
-    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-      <button
-        (click)="createWallet()"
-        type="button"
-        class="btn btn-success btn-lg px-4 gap-3"
-      >
-        Create wallet
-      </button>
-      <button type="button" disabled class="btn btn-info btn-lg px-4 gap-3">
-        Import Wallet
-        <!--Have sth here where when you click import it allows you to 
-          paste in a privKey into an input control, and click another "Import" to
-          actually import.  Or else show the input text and just click the one 
-          import button-->
+      <p>To use this ballot, connect a wallet</p>
+      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+        <button (click)="createWallet()" type="button" class="btn btn-success btn-lg px-4 gap-3">
+          Create wallet
+        </button>
+      </div><br/>
+      <p>or, paste in your wallet's private key and import that</p>
+      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+        
+        <input class="form-control" style="width:50%"
+          #walletPrivateKeyInput type="text"
+          placeholder="Paste wallet's private key here"><br/>
+        <button type="button" (click)="importWallet(walletPrivateKeyInput.value)" 
+          class="btn btn-info btn-lg px-4 gap-3">
+          Import Wallet
+        </button>
+      </div>
+      <br/>
+      <br/>
+      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+        <button type="button" disabled class="btn btn-danger btn-lg px-4 gap-3">
+          Connect Wallet
+        </button>
+      </div>
+    </div>
+    <div *ngIf="wallet" class="col-lg-6 mx-auto">
+      <p>You are connected to the wallet at {{wallet.address}}</p>
+      <p>This application uses the token at the address {{ tokenAddress }}</p>
+      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+        <div class="card">
+          <div class="card-body">
+            My ether balance is: {{etherBalance}}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+           My token balance is:  {{tokenBalance}}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            My voting power is:  {{votePower}}
+          </div>
+        </div>
+      </div>
+      <p class="my-4">claim your tokens here: </p>
+      <button (click)="claimTokens()" type="button" class="btn btn-success btn-lg px-4 gap-3">
+        Claim Tokens
       </button>
       <button type="button" disabled class="btn btn-danger btn-lg px-4 gap-3">
         Connect Wallet

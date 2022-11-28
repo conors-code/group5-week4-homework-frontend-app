@@ -29,29 +29,33 @@ export class AppComponent {
   createWallet() {
     //this is not a promise, it is an observabel so cannot be awaited. Can subscribe
     //  instead of await
-    console.log('About to subscribe');
-    this.http
-      .get<any>('http://localhost:3000/token-address')
-      .subscribe((ans) => {
-        this.tokenAddress = ans.result;
+    this.http.get<any>('http://localhost:3000/token-address').subscribe((ans) => {
+      this.tokenAddress = ans.result;
+      const unconnectedWallet = ethers.Wallet.createRandom();
+      this.updateContractInfoForWallet(unconnectedWallet);
+    });
+  }
 
-        console.log('Token addr is');
-        console.log(ans.result + ', ' + this.tokenAddress);
-        if (this.tokenAddress) {
-          //if the address isn't null, do the wallet, contract, ...
-          //this.wallet = new ethers.Wallet(userProvidedPrivateKey);
-          this.wallet = ethers.Wallet.createRandom().connect(this.provider);
-          //setup a token contract
-          this.tokenContract = new ethers.Contract(
-            this.tokenAddress,
-            tokenJson.abi,
-            this.wallet
-          );
-          //this.wallet.getBalance() returns a promise
-          //need .then to wait for the promise resolution
-          this.updateInfo();
-        }
-      });
+  importWallet(walletPrivateKey: string) {
+    this.http.get<any>("http://localhost:3000/token-address")
+      .subscribe((ans) => {
+          this.tokenAddress = ans.result;
+          if (walletPrivateKey) {
+            const unconnectedWallet = new ethers.Wallet(walletPrivateKey);
+            this.updateContractInfoForWallet(unconnectedWallet);
+          }
+    });
+  }
+
+  private updateContractInfoForWallet(unconnectedWallet: ethers.Wallet) {
+    //if the address isn't null, do the wallet, contract, update
+    if (this.tokenAddress) { 
+      this.wallet = unconnectedWallet.connect(this.provider);
+      this.tokenContract = new ethers.Contract(
+        this.tokenAddress, tokenJson.abi, this.wallet
+      );
+      this.updateInfo();
+    }
   }
 
   /**If the wallet and contract are already set we can update the display for
@@ -78,15 +82,18 @@ export class AppComponent {
           }
         );
       }
+    } else {
+      console.log("In updateInfo, this.wallet is unset");
     }
   }
 
   //TODO await for this transaction to be completed
   claimTokens() {
+    console.log("wallet addr is: " + this.wallet?.address);
     this.http
-      .post<any>('http://localhost:3000/claim-tokens', {
-        address: this.wallet?.address,
-      })
+    .post<any>('http://localhost:3000/claim-tokens', {
+      address: this.wallet?.address
+    })
       .subscribe((ans) => {
         //console.log({ans});
         //TODO await for this transaction to be completed.
