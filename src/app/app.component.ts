@@ -188,7 +188,7 @@ export class AppComponent {
         this.ballotProposals?.map((proposal, i) => {
           const idx = ethers.BigNumber.from(proposal[0]).toString();
           let name = ethers.utils.parseBytes32String(proposal[1]);
-          const voteCount = ethers.BigNumber.from(proposal[2]).toString();
+          const voteCount = ethers.utils.formatEther(proposal[2]).toString();
           let isWinning = ethers.utils.parseBytes32String(proposal[3]);
           this.ballotProposalsDisplay?.push({
             idx: idx,
