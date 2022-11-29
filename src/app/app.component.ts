@@ -4,6 +4,7 @@ import { ethers } from 'ethers';
 //import tokenJson directly to avoid the abi error, not import * as tokenJson
 //import * as MyTokenJson from '../assets/MyToken.json';
 import tokenJson from '../assets/MyToken.json';
+import ballotJson from '../assets/Ballot.json';
 import { AlchemyProvider } from '@ethersproject/providers';
 //const tokenJson = MyTokenJson;
 
@@ -15,6 +16,7 @@ import { AlchemyProvider } from '@ethersproject/providers';
 export class AppComponent {
   provider: ethers.providers.Provider;
   wallet: ethers.Wallet | undefined;
+  ballotContract: ethers.Contract | undefined;
   tokenContract: ethers.Contract | undefined;
   etherBalance: number | undefined;
   tokenBalance: number | undefined;
@@ -93,11 +95,14 @@ export class AppComponent {
             this.tokenBalance = parseFloat(ethers.utils.formatEther(balanceBN));
           }
         );
-        this.tokenContract['getVotes'](this.wallet.address).then(
-          (votePowerBN: ethers.BigNumberish) => {
-            this.votePower = parseFloat(ethers.utils.formatEther(votePowerBN));
-          }
-        );
+        
+        if (this.ballotContract) {
+          this.ballotContract['votePower'](this.wallet.address).then(
+            (votePowerBN: ethers.BigNumberish) => {
+              this.votePower = parseFloat(ethers.utils.formatEther(votePowerBN));
+            }
+          );
+        }
       }
     } else {
       console.log('In updateInfo, this.wallet is unset');
@@ -128,7 +133,16 @@ export class AppComponent {
   }
 
   connectBallot(ballotContractAddress: string) {
+    
+    if (ballotContractAddress && this.wallet) {
+      this.ballotContract = new ethers.Contract(
+        ballotContractAddress,
+        ballotJson.abi,
+        this.wallet
+      );
+    }
     this.getballotInfo(ballotContractAddress);
+    this.updateInfo();
   }
 
   delegateVote(delegateeAddress: string) {
@@ -142,12 +156,10 @@ export class AppComponent {
   }
 
   castVote(proposalNumber: string, voteAmount: string) {
-    const proposalNumberAsInt = parseInt(proposalNumber);
-    const voteAmountAsFloat = parseFloat(voteAmount);
     this.http
       .post<any>('http://localhost:3000/cast-vote', {
-        proposalNumberAsInt,
-        voteAmountAsFloat,
+        proposalNumber,
+        voteAmount,
       })
       .subscribe((ans) => {
         console.log(ans.result);
@@ -162,29 +174,28 @@ export class AppComponent {
       })
       .subscribe((ans) => {
         this.ballotProposals = ans.result;
+        //create the array with an empty type so it's not undefined. 
+        //Then pop the empty type, so that we don't have a blank one in the array.
+        this.ballotProposalsDisplay = [
+          {
+            idx: "",
+            name: "",
+            voteCount: "",
+            isWinning: "",
+          },
+        ];
+        this.ballotProposalsDisplay.pop();
         this.ballotProposals?.map((proposal, i) => {
           const idx = ethers.BigNumber.from(proposal[0]).toString();
           let name = ethers.utils.parseBytes32String(proposal[1]);
           const voteCount = ethers.BigNumber.from(proposal[2]).toString();
           let isWinning = ethers.utils.parseBytes32String(proposal[3]);
-          if (this.ballotProposalsDisplay === undefined) {
-            this.ballotProposalsDisplay = [
-              {
-                idx: idx,
-                name: name,
-                voteCount: voteCount,
-                isWinning: isWinning,
-              },
-            ];
-          } else {
-            //already defined and initialised
-            this.ballotProposalsDisplay?.push({
-              idx: idx,
-              name: name,
-              voteCount: voteCount,
-              isWinning: isWinning,
-            });
-          }
+          this.ballotProposalsDisplay?.push({
+            idx: idx,
+            name: name,
+            voteCount: voteCount,
+            isWinning: isWinning,
+          });
           console.log(
             'idx' +
               idx +
