@@ -31,6 +31,7 @@ export class AppComponent {
         }
       ]
     | undefined;
+  voteTransactionHash: string | undefined;
 
   constructor(private http: HttpClient) {
     //http is injected in constructor and is available in all fns
@@ -140,14 +141,17 @@ export class AppComponent {
       });
   }
 
-  castVote(proposalNumber: number, voteAmount: number) {
+  castVote(proposalNumber: string, voteAmount: string) {
+    const proposalNumberAsInt = parseInt(proposalNumber);
+    const voteAmountAsFloat = parseFloat(voteAmount);
     this.http
       .post<any>('http://localhost:3000/cast-vote', {
-        proposalNumber,
-        voteAmount,
+        proposalNumberAsInt,
+        voteAmountAsFloat,
       })
       .subscribe((ans) => {
-        console.log(ans);
+        console.log(ans.result);
+        this.voteTransactionHash = ans.result;
       });
   }
 

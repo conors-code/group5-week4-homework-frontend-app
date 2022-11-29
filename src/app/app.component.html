@@ -104,17 +104,28 @@
         &nbsp; &nbsp; Proposal {{ proposal.idx }} Name:
         {{ proposal.name }} &nbsp; &nbsp; Proposal {{ proposal.idx }} VoteCount:
         {{ proposal.voteCount }}
-        <input
-          class="form-control mb-4"
-          #proposalNumber
-          type="text"
-          placeholder="Amount"
-        /><br />
-        <button type="button" class="btn btn-success btn-sm px-4 gap-3">
-          Vote
-        </button>
-        <hr />
+        <hr/>
       </li>
     </ul>
+      
+    <input
+      class="form-control mb-4"
+      #proposalNumber
+      type="number"
+      placeholder="Proposal Index"/>
+    &nbsp;&nbsp;
+    <input
+      class="form-control mb-4"
+      #amountToVote
+      type="number"
+      placeholder="Amount to vote"/>
+    <br />
+    <button type="button" (click)="castVote(proposalNumber.value, amountToVote.value)" class="btn btn-success btn-sm px-4 gap-3">
+       Vote
+    </button>
+  </div>
+  
+  <div *ngIf="voteTransactionHash" class="col-lg-6 mx-auto">
+    Voted; transaction hash is {{voteTransactionHash}}.
   </div>
 </div>
