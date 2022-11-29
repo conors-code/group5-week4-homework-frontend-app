@@ -4,6 +4,7 @@ import { ethers } from 'ethers';
 //import tokenJson directly to avoid the abi error, not import * as tokenJson
 //import * as MyTokenJson from '../assets/MyToken.json';
 import tokenJson from '../assets/MyToken.json';
+import { AlchemyProvider } from '@ethersproject/providers';
 //const tokenJson = MyTokenJson;
 
 @Component({
@@ -11,8 +12,6 @@ import tokenJson from '../assets/MyToken.json';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-
-
 export class AppComponent {
   provider: ethers.providers.Provider;
   wallet: ethers.Wallet | undefined;
@@ -21,14 +20,17 @@ export class AppComponent {
   tokenBalance: number | undefined;
   votePower: number | undefined;
   tokenAddress: string | undefined;
-  ballotProposals:[] | undefined;
-  ballotProposalsDisplay:[ {
-      idx: string;
-      name: string;
-      voteCount: string;
-      isWinning: string;
-    }] | undefined;
-  
+  ballotProposals: [] | undefined;
+  ballotProposalsDisplay:
+    | [
+        {
+          idx: string;
+          name: string;
+          voteCount: string;
+          isWinning: string;
+        }
+      ]
+    | undefined;
 
   constructor(private http: HttpClient) {
     //http is injected in constructor and is available in all fns
@@ -38,30 +40,35 @@ export class AppComponent {
   createWallet() {
     //this is not a promise, it is an observabel so cannot be awaited. Can subscribe
     //  instead of await
-    this.http.get<any>('http://localhost:3000/token-address').subscribe((ans) => {
-      this.tokenAddress = ans.result;
-      const unconnectedWallet = ethers.Wallet.createRandom();
-      this.updateContractInfoForWallet(unconnectedWallet);
-    });
+    this.http
+      .get<any>('http://localhost:3000/token-address')
+      .subscribe((ans) => {
+        this.tokenAddress = ans.result;
+        const unconnectedWallet = ethers.Wallet.createRandom();
+        this.updateContractInfoForWallet(unconnectedWallet);
+      });
   }
 
   importWallet(walletPrivateKey: string) {
-    this.http.get<any>("http://localhost:3000/token-address")
+    this.http
+      .get<any>('http://localhost:3000/token-address')
       .subscribe((ans) => {
-          this.tokenAddress = ans.result;
-          if (walletPrivateKey) {
-            const unconnectedWallet = new ethers.Wallet(walletPrivateKey);
-            this.updateContractInfoForWallet(unconnectedWallet);
-          }
-    });
+        this.tokenAddress = ans.result;
+        if (walletPrivateKey) {
+          const unconnectedWallet = new ethers.Wallet(walletPrivateKey);
+          this.updateContractInfoForWallet(unconnectedWallet);
+        }
+      });
   }
 
   private updateContractInfoForWallet(unconnectedWallet: ethers.Wallet) {
     //if the address isn't null, do the wallet, contract, update
-    if (this.tokenAddress) { 
+    if (this.tokenAddress) {
       this.wallet = unconnectedWallet.connect(this.provider);
       this.tokenContract = new ethers.Contract(
-        this.tokenAddress, tokenJson.abi, this.wallet
+        this.tokenAddress,
+        tokenJson.abi,
+        this.wallet
       );
       this.updateInfo();
     }
@@ -92,17 +99,17 @@ export class AppComponent {
         );
       }
     } else {
-      console.log("In updateInfo, this.wallet is unset");
+      console.log('In updateInfo, this.wallet is unset');
     }
   }
 
   //TODO await for this transaction to be completed
   claimTokens() {
-    console.log("wallet addr is: " + this.wallet?.address);
+    console.log('wallet addr is: ' + this.wallet?.address);
     this.http
-    .post<any>('http://localhost:3000/claim-tokens', {
-      address: this.wallet?.address
-    })
+      .post<any>('http://localhost:3000/claim-tokens', {
+        address: this.wallet?.address,
+      })
       .subscribe((ans) => {
         //console.log({ans});
         //TODO await for this transaction to be completed.
@@ -123,9 +130,26 @@ export class AppComponent {
     this.getballotInfo(ballotContractAddress);
   }
 
-  delegate() {}
+  delegateVote(delegateeAddress: string) {
+    this.http
+      .post<any>('http://localhost:3000/delegate-vote', {
+        address: delegateeAddress,
+      })
+      .subscribe((ans) => {
+        this.updateInfo();
+      });
+  }
 
-  castVote() {}
+  castVote(proposalNumber: number, voteAmount: number) {
+    this.http
+      .post<any>('http://localhost:3000/cast-vote', {
+        proposalNumber,
+        voteAmount,
+      })
+      .subscribe((ans) => {
+        console.log(ans);
+      });
+  }
 
   getballotInfo(ballotContractAddress: string) {
     this.http
@@ -133,7 +157,6 @@ export class AppComponent {
         address: ballotContractAddress,
       })
       .subscribe((ans) => {
-        
         this.ballotProposals = ans.result;
         this.ballotProposals?.map((proposal, i) => {
           const idx = ethers.BigNumber.from(proposal[0]).toString();
@@ -141,15 +164,33 @@ export class AppComponent {
           const voteCount = ethers.BigNumber.from(proposal[2]).toString();
           let isWinning = ethers.utils.parseBytes32String(proposal[3]);
           if (this.ballotProposalsDisplay === undefined) {
-            this.ballotProposalsDisplay = [{         
-              "idx": idx, "name": name , "voteCount": voteCount, "isWinning": isWinning
-            }];
-          } else  {  //already defined and initialised
-            this.ballotProposalsDisplay?.push({         
-              "idx": idx, "name": name , "voteCount": voteCount, "isWinning": isWinning
+            this.ballotProposalsDisplay = [
+              {
+                idx: idx,
+                name: name,
+                voteCount: voteCount,
+                isWinning: isWinning,
+              },
+            ];
+          } else {
+            //already defined and initialised
+            this.ballotProposalsDisplay?.push({
+              idx: idx,
+              name: name,
+              voteCount: voteCount,
+              isWinning: isWinning,
             });
           }
-          console.log("idx" + idx + "name" + name + "voteCount" + voteCount + "isWinning" +isWinning);
+          console.log(
+            'idx' +
+              idx +
+              'name' +
+              name +
+              'voteCount' +
+              voteCount +
+              'isWinning' +
+              isWinning
+          );
         });
       });
   }

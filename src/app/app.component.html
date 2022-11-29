@@ -3,48 +3,79 @@
   <div *ngIf="!wallet" class="col-lg-6 mx-auto">
     <!--<p *ngIf="lastBlockNumber">The last block in the blockchain is {{ lastBlockNumber }}.</p>
       <p>My number is {{ myNumber }} </p>-->
-      <p>To use this ballot, connect a wallet</p>
-      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-        <button (click)="createWallet()" type="button" class="btn btn-success btn-lg px-4 gap-3">
-          Create wallet
-        </button>
-      </div><br/>
-      <p>or, paste in your wallet's private key and import that</p>
-      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-        
-        <input class="form-control" style="width:50%"
-          #walletPrivateKeyInput type="text"
-          placeholder="Paste wallet's private key here"><br/>
-        <button type="button" (click)="importWallet(walletPrivateKeyInput.value)" 
-          class="btn btn-info btn-lg px-4 gap-3">
-          Import Wallet
-        </button>
-      </div>
-      <br/>
-      <br/>
-      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-        <button type="button" disabled class="btn btn-danger btn-lg px-4 gap-3">
-          Connect Wallet
-        </button>
-      </div>
+    <p>To use this ballot, connect a wallet</p>
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+      <button
+        (click)="createWallet()"
+        type="button"
+        class="btn btn-success btn-lg px-4 gap-3"
+      >
+        Create wallet
+      </button>
+    </div>
+    <br />
+    <p>or, paste in your wallet's private key and import that</p>
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+      <input
+        class="form-control"
+        style="width: 50%"
+        #walletPrivateKeyInput
+        type="text"
+        placeholder="Paste wallet's private key here"
+      /><br />
+      <button
+        type="button"
+        (click)="importWallet(walletPrivateKeyInput.value)"
+        class="btn btn-info btn-lg px-4 gap-3"
+      >
+        Import Wallet
+      </button>
+    </div>
+    <br />
+    <br />
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+      <button type="button" disabled class="btn btn-danger btn-lg px-4 gap-3">
+        Connect Wallet
+      </button>
+    </div>
   </div>
   <div *ngIf="wallet" class="col-lg-6 mx-auto">
-    <p>You are connected to the wallet at {{wallet.address}}</p>
+    <p>You are connected to the wallet at {{ wallet.address }}</p>
     <p>This application uses the token at the address {{ tokenAddress }}</p>
     <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
       <div class="card">
+        <div class="card-body">My ether balance is: {{ etherBalance }}</div>
+      </div>
+      <div class="card">
         <div class="card-body">
-          My ether balance is: {{etherBalance}}
+          My token balance is: {{ tokenBalance }}
+          <div *ngIf="tokenBalance == 0">
+            <button
+              (click)="claimTokens()"
+              type="button"
+              class="btn btn-success btn-sm mt-2 px-4 gap-3"
+            >
+              Claim Tokens
+            </button>
+          </div>
         </div>
       </div>
       <div class="card">
         <div class="card-body">
-          My token balance is:  {{tokenBalance}}
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-body">
-          My voting power is:  {{votePower}}
+          My voting power is: {{ votePower }}
+          <input
+            class="form-control my-2"
+            #delegateeAddress
+            type="text"
+            placeholder="Address here"
+          />
+          <button
+            (click)="delegateVote(delegateeAddress.value)"
+            type="button"
+            class="btn btn-success btn-sm px-4 gap-3"
+          >
+            Delegate Vote
+          </button>
         </div>
       </div>
     </div>
@@ -63,17 +94,27 @@
     >
       Connect Ballot
     </button>
-    <div *ngIf="ballotProposalsDisplay" class="col-lg-12 mx-auto">
-      <ul>
-        <li *ngFor="let proposal of ballotProposalsDisplay"> 
-          Proposal Index: {{ proposal.idx }}  &nbsp; &nbsp; Is proposal {{ proposal.idx }} Winning? {{ proposal.isWinning }} 
-          <br/>
-          &nbsp; &nbsp; Proposal {{ proposal.idx }} Name: {{ proposal.name }} 
-          &nbsp; &nbsp; Proposal {{ proposal.idx }} VoteCount: {{ proposal.voteCount }} 
-          <hr/>
-        
-        </li>
-      </ul>
-    </div>
+  </div>
+  <div *ngIf="ballotProposalsDisplay" class="col-lg-6 mx-auto">
+    <ul>
+      <li class="list-unstyled" *ngFor="let proposal of ballotProposalsDisplay">
+        Proposal Index: {{ proposal.idx }} &nbsp; &nbsp; Is proposal
+        {{ proposal.idx }} Winning? {{ proposal.isWinning }}
+        <br />
+        &nbsp; &nbsp; Proposal {{ proposal.idx }} Name:
+        {{ proposal.name }} &nbsp; &nbsp; Proposal {{ proposal.idx }} VoteCount:
+        {{ proposal.voteCount }}
+        <input
+          class="form-control mb-4"
+          #proposalNumber
+          type="text"
+          placeholder="Amount"
+        /><br />
+        <button type="button" class="btn btn-success btn-sm px-4 gap-3">
+          Vote
+        </button>
+        <hr />
+      </li>
+    </ul>
   </div>
 </div>
